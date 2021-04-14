@@ -1,7 +1,7 @@
-from typing import Optional
 import binascii
 import logging
 import zlib
+from typing import Optional
 
 import base45
 import qrcode
