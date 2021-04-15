@@ -3,27 +3,30 @@ import binascii
 
 import cbor2
 from cryptojwt.utils import b64e
-import cose.headers
+from cose.headers import CoseHeaderAttribute
 
 from hcert.cwt import CwtClaims
 
 
-def print_hdr(hdr):
+def print_header(hdr):
     if isinstance(hdr, dict):
         for k, v in hdr.items():
-            claim = cose.headers(k)
+            attr = CoseHeaderAttribute.from_id(k)
             if isinstance(v, bytes):
                 v = "{hex}" + binascii.hexlify(v).decode()
-            print(f"  {claim.name.lower()} ({k}) = {v}")
+            print(f"  {k} ({attr.fullname}) = {v}")
 
 
 def print_message(msg):
-    if isinstance(hdr, dict):
-        for k, v in hdr.items():
-            claim = CwtClaims(k)
+    if isinstance(msg, dict):
+        for k, v in msg.items():
+            try:
+                claim = CwtClaims(k).name.lower()
+            except ValueError:
+                claim = None
             if isinstance(v, bytes):
                 v = "{hex}" + binascii.hexlify(v).decode()
-            print(f"  {claim.name.lower()} ({k}) = {v}")
+            print(f"  {k} ({claim}) = {v}")
 
 
 def main():
@@ -48,12 +51,14 @@ def main():
     signature = cwt_cbor.value[3]
 
     print("Protected header:")
-    print_hdr(phdr)
+    print_header(phdr)
 
     print("Unprotected header:")
-    print_hdr(uhdr)
+    print_header(uhdr)
 
-    print("Message:", message)
+    print("Message:")
+    print_message(message)
+
     print("Signature:", b64e(signature).decode())
 
 
