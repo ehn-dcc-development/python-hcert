@@ -3,11 +3,21 @@ import binascii
 
 import cbor2
 from cryptojwt.utils import b64e
+import cose.headers
 
 from hcert.cwt import CwtClaims
 
 
 def print_hdr(hdr):
+    if isinstance(hdr, dict):
+        for k, v in hdr.items():
+            claim = cose.headers(k)
+            if isinstance(v, bytes):
+                v = "{hex}" + binascii.hexlify(v).decode()
+            print(f"  {claim.name.lower()} ({k}) = {v}")
+
+
+def print_message(msg):
     if isinstance(hdr, dict):
         for k, v in hdr.items():
             claim = CwtClaims(k)
