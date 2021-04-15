@@ -116,7 +116,7 @@ class CWT(object):
         cose_msg = Sign1Message(
             phdr=self.protected_header if len(self.protected_header) else None,
             uhdr=self.unprotected_header if len(self.unprotected_header) else None,
-            payload = cbor2.dumps(self.claims)
+            payload=cbor2.dumps(self.claims),
         )
         cose_msg.key = private_key
         return cose_msg.encode()

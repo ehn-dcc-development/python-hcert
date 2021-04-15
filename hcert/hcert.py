@@ -45,7 +45,9 @@ def sign(
         HCERT_CLAIM: {content.value: payload},
     }
     cwt = CWT.from_dict(claims=claims, issuer=issuer, ttl=ttl)
-    cwt_bytes = cwt.sign(private_key=private_key, alg=SIGN_ALG, kid_protected=kid_protected)
+    cwt_bytes = cwt.sign(
+        private_key=private_key, alg=SIGN_ALG, kid_protected=kid_protected
+    )
 
     logger.info("Raw signed CWT: %d bytes", len(cwt_bytes))
 
