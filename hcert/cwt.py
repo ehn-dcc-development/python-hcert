@@ -90,20 +90,31 @@ class CWT(object):
     claims_map = CwtClaims
 
     def __init__(self, *args, **kwargs) -> None:
-        self.protected_header = kwargs.get("protected_header")
-        self.unprotected_header = kwargs.get("unprotected_header")
+        self.protected_header = kwargs.get("protected_header", {})
+        self.unprotected_header = kwargs.get("unprotected_header", {})
         self.claims = kwargs.get("claims", {})
         self.key = kwargs.get("key")
 
-    def sign(self, private_key: CoseKey, alg: cose.algorithms.CoseAlgorithm) -> bytes:
-        self.protected_header = {
-            cose.headers.Algorithm: alg,
-            cose.headers.ContentType: CoseContentTypes.CWT.value,
-            cose.headers.KID: private_key.kid,
-        }
-        payload = cbor2.dumps(self.claims)
+    def sign(
+        self,
+        private_key: CoseKey,
+        alg: cose.algorithms.CoseAlgorithm,
+        kid_protected: bool = True,
+    ) -> bytes:
+        self.protected_header.update(
+            {
+                cose.headers.Algorithm: alg,
+                cose.headers.ContentType: CoseContentTypes.CWT.value,
+            }
+        )
+        if kid_protected:
+            self.protected_header[cose.headers.KID] = private_key.kid
+        else:
+            self.unprotected_header[cose.headers.KID] = private_key.kid
         cose_msg = Sign1Message(
-            phdr=self.protected_header, uhdr=self.unprotected_header, payload=payload
+            phdr=self.protected_header if len(self.protected_header) else None,
+            uhdr=self.unprotected_header if len(self.unprotected_header) else None,
+            payload=payload,
         )
         cose_msg.key = private_key
         return cose_msg.encode()
