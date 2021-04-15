@@ -2,8 +2,8 @@ import argparse
 import binascii
 
 import cbor2
-from cryptojwt.utils import b64e
 from cose.headers import CoseHeaderAttribute
+from cryptojwt.utils import b64e
 
 from hcert.cwt import CwtClaims
 
