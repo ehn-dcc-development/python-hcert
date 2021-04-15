@@ -37,6 +37,7 @@ def sign(
     ttl: int,
     payload: dict,
     content: HealthCertificateClaims = HealthCertificateClaims.EU_HCERT_V1,
+    kid_protected: bool = True,
 ) -> bytes:
     """Create signed HCERT"""
 
@@ -44,7 +45,7 @@ def sign(
         HCERT_CLAIM: {content.value: payload},
     }
     cwt = CWT.from_dict(claims=claims, issuer=issuer, ttl=ttl)
-    cwt_bytes = cwt.sign(private_key=private_key, alg=SIGN_ALG)
+    cwt_bytes = cwt.sign(private_key=private_key, alg=SIGN_ALG, kid_protected=kid_protected)
 
     logger.info("Raw signed CWT: %d bytes", len(cwt_bytes))
 

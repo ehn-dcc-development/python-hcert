@@ -35,6 +35,21 @@ def test_sign_verify():
     assert res.expired is False
 
 
+def test_sign_verify_unprotected_kid():
+
+    private_key, public_key = gen_keypair()
+
+    issuer = "hello"
+    ttl = 3600
+    payload = {"test": True}
+
+    signed_data = sign(private_key, issuer, ttl, payload, kid_protected=False)
+    res = verify(signed_data, [public_key])
+
+    assert res.eu_hcert_v1.get("test") is True
+    assert res.expired is False
+
+
 def test_optical():
 
     payload = os.urandom(1024)
