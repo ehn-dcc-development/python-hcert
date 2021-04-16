@@ -12,13 +12,12 @@ from cryptojwt.utils import b64e
 from .cwt import CWT, CwtClaims
 
 SIGN_ALG = cose.algorithms.Es256
-HCERT_CLAIM = -65537
 
 logger = logging.getLogger(__name__)
 
 
 class HealthCertificateClaims(Enum):
-    EU_HCERT_V1 = 1
+    EU_DGC_V1 = 1
 
 
 @dataclass
@@ -28,7 +27,7 @@ class HcertVerifyResult:
     iat: datetime
     exp: datetime
     expired: bool
-    eu_hcert_v1: dict
+    eu_dgc_v1: dict
 
 
 def sign(
@@ -36,13 +35,13 @@ def sign(
     issuer: str,
     ttl: int,
     payload: dict,
-    content: HealthCertificateClaims = HealthCertificateClaims.EU_HCERT_V1,
+    content: HealthCertificateClaims = HealthCertificateClaims.EU_DGC_V1,
     kid_protected: bool = True,
 ) -> bytes:
     """Create signed HCERT"""
 
     claims = {
-        HCERT_CLAIM: {content.value: payload},
+        CwtClaims.HCERT.value: {content.value: payload},
     }
     cwt = CWT.from_dict(claims=claims, issuer=issuer, ttl=ttl)
     cwt_bytes = cwt.sign(
@@ -75,8 +74,8 @@ def verify(signed_data: bytes, public_keys: List[CoseKey]) -> dict:
             logger.info("Signatured expired at: %s", datetime.fromtimestamp(exp))
             expired = True
 
-    hcert = cwt.claims.get(HCERT_CLAIM)
-    eu_hcert_v1 = hcert.get(HealthCertificateClaims.EU_HCERT_V1.value)
+    hcert = cwt.claims.get(CwtClaims.HCERT.value)
+    eu_dgc_v1 = hcert.get(HealthCertificateClaims.EU_DGC_V1.value)
 
     return HcertVerifyResult(
         iss=iss,
@@ -84,5 +83,5 @@ def verify(signed_data: bytes, public_keys: List[CoseKey]) -> dict:
         iat=datetime.fromtimestamp(iat) if iat else None,
         exp=datetime.fromtimestamp(exp) if exp else None,
         expired=expired,
-        eu_hcert_v1=eu_hcert_v1,
+        eu_dgc_v1=eu_dgc_v1,
     )

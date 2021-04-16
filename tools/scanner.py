@@ -77,10 +77,10 @@ def process_hc1_cwt(signed_data: bytes, public_keys):
     else:
         logger.info("Signatured expires at: %s", res.exp)
 
-    if res.eu_hcert_v1 is None:
+    if res.eu_dgc_v1 is None:
         logger.warning("No EU HCERT version 1 found in payload")
 
-    logger.info("Verified payload: %s", json.dumps(res.eu_hcert_v1, indent=4))
+    logger.info("Verified payload: %s", json.dumps(res.eu_dgc_v1, indent=4))
 
 
 def main():

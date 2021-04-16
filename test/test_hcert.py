@@ -31,7 +31,7 @@ def test_sign_verify():
     signed_data = sign(private_key, issuer, ttl, payload)
     res = verify(signed_data, [public_key])
 
-    assert res.eu_hcert_v1.get("test") is True
+    assert res.eu_dgc_v1.get("test") is True
     assert res.expired is False
 
 
@@ -46,7 +46,7 @@ def test_sign_verify_unprotected_kid():
     signed_data = sign(private_key, issuer, ttl, payload, kid_protected=False)
     res = verify(signed_data, [public_key])
 
-    assert res.eu_hcert_v1.get("test") is True
+    assert res.eu_dgc_v1.get("test") is True
     assert res.expired is False
 
 

@@ -24,9 +24,9 @@ def command_sign(args: argparse.Namespace):
 
     logger.info("Input JSON data: %d bytes", len(input_data))
 
-    eu_hcert_v1 = json.loads(input_data)
+    eu_dgc_v1 = json.loads(input_data)
     cwt_bytes = sign(
-        private_key=private_key, payload=eu_hcert_v1, issuer=args.issuer, ttl=args.ttl
+        private_key=private_key, payload=eu_dgc_v1, issuer=args.issuer, ttl=args.ttl
     )
     logger.info("Raw signed CWT: %d bytes", len(cwt_bytes))
 
@@ -62,14 +62,14 @@ def command_verify(args: argparse.Namespace):
     else:
         logger.info("Signatured expires at: %s", res.exp)
 
-    if res.eu_hcert_v1 is None:
-        logger.warning("No EU HCERT version 1 found in payload")
+    if res.eu_dgc_v1 is None:
+        logger.warning("No EU DGC version 1 found in payload")
 
     if args.output:
         with open(args.output, "wt") as output_file:
-            json.dump(res.eu_hcert_v1, output_file, indent=4)
+            json.dump(res.eu_dgc_v1, output_file, indent=4)
     else:
-        logger.info("Verified payload: %s", json.dumps(res.eu_hcert_v1, indent=4))
+        logger.info("Verified payload: %s", json.dumps(res.eu_dgc_v1, indent=4))
 
 
 def main():
