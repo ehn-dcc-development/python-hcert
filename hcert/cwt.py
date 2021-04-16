@@ -33,7 +33,6 @@ class CwtClaims(Enum):
     IAT = 6
     CTI = 7
     HCERT = -260
-    HCERT_TEST = -65537
 
 
 def read_cosekey(filename: str, private: bool = True) -> CoseKey:
