@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "hcert"
-version = "0.1.0"
+version = "0.2.0"
 description = "Electronic Health Certificate (HCERT)"
 authors = ["Jakob Schlyter <jakob@kirei.se>"]
 

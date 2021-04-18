@@ -131,8 +131,8 @@ def main():
         data = scanner.read()
         if data:
             s = data.decode()
-            if s.startswith("HC1"):
-                signed_data = decode_and_decompress(data[3:])
+            if s.startswith("HC1:"):
+                signed_data = decode_and_decompress(data[4:])
                 process_hc1_cwt(signed_data, public_keys)
         time.sleep(1)
 
