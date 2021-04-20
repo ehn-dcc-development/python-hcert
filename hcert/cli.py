@@ -121,7 +121,7 @@ def main():
     parser_sign.add_argument(
         "--output",
         metavar="filename",
-        help="Compressed CBOR output",
+        help="Binary CWT output",
         required=False,
     )
     parser_sign.add_argument(
