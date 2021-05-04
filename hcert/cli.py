@@ -37,7 +37,7 @@ def command_sign(args: argparse.Namespace):
         logger.info("Output: %s", binascii.hexlify(cwt_bytes).decode())
 
     if args.qrcode:
-        save_qrcode(cwt_bytes, args.qrcode)
+        save_qrcode(cwt_bytes, args.qrcode, args.hc)
 
 
 def command_verify(args: argparse.Namespace):
@@ -134,6 +134,15 @@ def main():
         "--qrcode",
         metavar="filename",
         help="QR output",
+        required=False,
+    )
+    parser_sign.add_argument(
+        "--hc",
+        metavar="version",
+        choices=[1, 2],
+        default=1,
+        type=int,
+        help="HCERT encoding version",
         required=False,
     )
 

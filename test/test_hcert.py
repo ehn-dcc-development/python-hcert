@@ -52,12 +52,18 @@ def test_sign_verify_unprotected_kid():
 
 def test_optical():
 
-    payload = os.urandom(1024)
+    for size in [512, 513]:
+        payload = os.urandom(size)
 
-    e = compress_and_encode(payload)
-    d = decode_and_decompress(e)
+        e = compress_and_encode(payload)
+        d = decode_and_decompress(e)
 
-    assert d == payload
+        assert d == payload
+
+        e = compress_and_encode(payload, encoding="base32")
+        d = decode_and_decompress(e, encoding="base32")
+
+        assert d == payload
 
 
 def test_qr():
