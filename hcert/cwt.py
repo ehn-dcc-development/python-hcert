@@ -82,7 +82,7 @@ def cosekey_from_jwk_dict(jwk_dict: Dict, private: bool = True) -> CoseKey:
         )
         key.key_ops = [cose.keys.keyops.VerifyOp]
     if "kid" in jwk_dict:
-        key.kid = jwk_dict["kid"].encode()
+        key.kid = b64d(jwk_dict["kid"].encode())
     return key
 
 
