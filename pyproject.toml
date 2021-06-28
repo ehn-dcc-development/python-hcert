@@ -1,16 +1,16 @@
 [tool.poetry]
 name = "hcert"
-version = "0.3.0"
+version = "0.3.1"
 description = "Electronic Health Certificate (HCERT)"
 authors = ["Jakob Schlyter <jakob@kirei.se>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
 jsonschema = "^3.2.0"
-cose = "0.9.dev3"
+cose = "0.9.dev7"
 cbor2 = "^5.2.0"
 cryptojwt = "^1.4.0"
-base45 = "^0.2.0"
+base45 = "^0.3.1"
 PyYAML = "^5.4.1"
 Pillow = "^8.1.1"
 qrcode = "^6.1"

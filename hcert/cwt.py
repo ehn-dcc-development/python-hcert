@@ -5,8 +5,8 @@ from typing import Dict, List, Optional
 
 import cbor2
 import cose.algorithms
-import cose.curves
 import cose.headers
+import cose.keys.curves
 import cose.keys.keyops
 from cose.keys.cosekey import CoseKey
 from cose.keys.ec2 import EC2
@@ -68,7 +68,7 @@ def cosekey_from_jwk_dict(jwk_dict: Dict, private: bool = True) -> CoseKey:
 
     if private:
         key = EC2(
-            crv=cose.curves.P256,
+            crv=cose.keys.curves.P256,
             x=b64d(jwk_dict["x"].encode()),
             y=b64d(jwk_dict["y"].encode()),
             d=b64d(jwk_dict["d"].encode()),
@@ -76,7 +76,7 @@ def cosekey_from_jwk_dict(jwk_dict: Dict, private: bool = True) -> CoseKey:
         key.key_ops = [cose.keys.keyops.SignOp, cose.keys.keyops.VerifyOp]
     else:
         key = EC2(
-            crv=cose.curves.P256,
+            crv=cose.keys.curves.P256,
             x=b64d(jwk_dict["x"].encode()),
             y=b64d(jwk_dict["y"].encode()),
         )
