@@ -9,7 +9,8 @@ import cose.headers
 import cose.keys.curves
 import cose.keys.keyops
 from cose.keys.cosekey import CoseKey
-from cose.keys.ec2 import EC2
+from cose.keys.ec2 import EC2Key
+from cose.keys.rsa import RSAKey
 from cose.messages import CoseMessage
 from cose.messages.sign1message import Sign1Message
 from cryptojwt.jwk.ec import ECKey
@@ -60,29 +61,52 @@ def read_cosekey(filename: str, private: bool = True) -> CoseKey:
 def cosekey_from_jwk_dict(jwk_dict: Dict, private: bool = True) -> CoseKey:
     """Read key and return CoseKey"""
 
-    if jwk_dict["kty"] != "EC":
-        raise ValueError("Only EC keys supported")
+    if jwk_dict["kty"] == "EC":
 
-    if jwk_dict["crv"] != "P-256":
-        raise ValueError("Only P-256 supported")
+        if jwk_dict["crv"] != "P-256":
+            raise ValueError("Only P-256 supported")
+
+        if private:
+            key = EC2Key(
+                crv=cose.keys.curves.P256,
+                x=b64d(jwk_dict["x"].encode()),
+                y=b64d(jwk_dict["y"].encode()),
+                d=b64d(jwk_dict["d"].encode()),
+            )
+        else:
+            key = EC2Key(
+                crv=cose.keys.curves.P256,
+                x=b64d(jwk_dict["x"].encode()),
+                y=b64d(jwk_dict["y"].encode()),
+            )
+
+    elif jwk_dict["kty"] == "RSA":
+
+        if private:
+            key = RSAKey(
+                e=b64d(jwk_dict["e"].encode()),
+                n=b64d(jwk_dict["n"].encode()),
+                p=b64d(jwk_dict["p"].encode()),
+                q=b64d(jwk_dict["q"].encode()),
+                d=b64d(jwk_dict["d"].encode()),
+            )
+        else:
+            key = RSAKey(
+                e=b64d(jwk_dict["e"].encode()),
+                n=b64d(jwk_dict["n"].encode()),
+            )
+
+    else:
+        raise ValueError("Unsupport key type: " + jwk_dict["kty"])
 
     if private:
-        key = EC2(
-            crv=cose.keys.curves.P256,
-            x=b64d(jwk_dict["x"].encode()),
-            y=b64d(jwk_dict["y"].encode()),
-            d=b64d(jwk_dict["d"].encode()),
-        )
         key.key_ops = [cose.keys.keyops.SignOp, cose.keys.keyops.VerifyOp]
     else:
-        key = EC2(
-            crv=cose.keys.curves.P256,
-            x=b64d(jwk_dict["x"].encode()),
-            y=b64d(jwk_dict["y"].encode()),
-        )
         key.key_ops = [cose.keys.keyops.VerifyOp]
+
     if "kid" in jwk_dict:
         key.kid = b64d(jwk_dict["kid"].encode())
+
     return key
 
 
