@@ -1,4 +1,4 @@
-"""Tool to process DGC test data"""
+"""Tool to process DCC test data"""
 
 import argparse
 import datetime
@@ -39,7 +39,7 @@ def canonicalize_dict(d: dict) -> dict:
 def main():
     """Main function"""
 
-    parser = argparse.ArgumentParser(description="DGC test eval")
+    parser = argparse.ArgumentParser(description="DCC test eval")
 
     parser.add_argument(
         "testfile",
@@ -98,8 +98,8 @@ def main():
     res = verify(signed_data=signed_data, public_keys=[public_key])
     logger.info("Signature verified")
 
-    if res.eu_dgc_v1 is None:
-        logger.warning("No EU DGC version 1 found in payload")
+    if res.eu_dcc_v1 is None:
+        logger.warning("No EU DCC version 1 found in payload")
         sys.exit(-1)
 
     if reference_payload:
