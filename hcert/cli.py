@@ -63,7 +63,7 @@ def command_verify(args: argparse.Namespace):
         logger.info("Signatured expires at: %s", res.exp)
 
     if res.eu_dgc_v1 is None:
-        logger.warning("No EU DGC version 1 found in payload")
+        logger.warning("No EU DCC version 1 found in payload")
 
     if args.output:
         with open(args.output, "wt") as output_file:

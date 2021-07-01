@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 class HealthCertificateClaims(Enum):
-    EU_DGC_V1 = 1
+    EU_DCC_V1 = 1
 
 
 @dataclass
@@ -35,7 +35,7 @@ def sign(
     issuer: str,
     ttl: int,
     payload: dict,
-    content: HealthCertificateClaims = HealthCertificateClaims.EU_DGC_V1,
+    content: HealthCertificateClaims = HealthCertificateClaims.EU_DCC_V1,
     kid_protected: bool = True,
 ) -> bytes:
     """Create signed HCERT"""
@@ -75,7 +75,7 @@ def verify(signed_data: bytes, public_keys: List[CoseKey]) -> dict:
             expired = True
 
     hcert = cwt.claims.get(CwtClaims.HCERT.value)
-    eu_dgc_v1 = hcert.get(HealthCertificateClaims.EU_DGC_V1.value)
+    eu_dgc_v1 = hcert.get(HealthCertificateClaims.EU_DCC_V1.value)
 
     return HcertVerifyResult(
         iss=iss,
