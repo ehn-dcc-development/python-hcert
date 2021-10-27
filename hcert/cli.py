@@ -5,7 +5,7 @@ import logging
 
 from cryptojwt.utils import b64d, b64e
 
-from .cwt import read_cosekey
+from .cwt import cosekey_from_jwk_dict, read_cosekey
 from .hcert import sign, verify
 from .optical import save_qrcode
 
@@ -43,7 +43,15 @@ def command_sign(args: argparse.Namespace):
 def command_verify(args: argparse.Namespace):
     """Verify signed EHC"""
 
-    public_key = read_cosekey(args.key, private=False)
+    public_keys = []
+    if args.jwks:
+        with open(args.jwks) as jwks_file:
+            jwks = json.load(jwks_file)
+            for jwk_dict in jwks.get("keys", []):
+                key = cosekey_from_jwk_dict(jwk_dict, private=False)
+                public_keys.append(key)
+    elif args.key:
+        public_keys = [read_cosekey(args.key, private=False)]
 
     if args.kid:
         public_key.kid = b64d(args.kid.encode())
@@ -51,7 +59,7 @@ def command_verify(args: argparse.Namespace):
     with open(args.input, "rb") as input_file:
         signed_data = input_file.read()
 
-    res = verify(signed_data=signed_data, public_keys=[public_key])
+    res = verify(signed_data=signed_data, public_keys=public_keys)
 
     logger.info("Signatured issued by: %s", res.iss)
     logger.info("Signature verified by: %s", b64e(res.kid).decode())
@@ -139,8 +147,9 @@ def main():
 
     parser_verify = subparsers.add_parser("verify", help="Verify signed cert")
     parser_verify.set_defaults(func=command_verify)
+    parser_verify.add_argument("--key", metavar="filename", help="Public JWK filename")
     parser_verify.add_argument(
-        "--key", metavar="filename", help="Public JWK filename", required=True
+        "--jwks", metavar="filename", help="Public JWKS filename"
     )
     parser_verify.add_argument(
         "--input",
