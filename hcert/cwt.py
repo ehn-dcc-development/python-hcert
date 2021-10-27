@@ -164,9 +164,7 @@ class CWT(object):
             ]
             cose_msg = SignMessage(
                 phdr={cose.headers.ContentType: CoseContentTypes.CWT.value},
-                uhdr=self.unprotected_header
-                if len(self.unprotected_header)
-                else None,
+                uhdr=self.unprotected_header if len(self.unprotected_header) else None,
                 payload=cbor2.dumps(self.claims),
                 signers=signers,
             )
