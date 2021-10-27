@@ -1,5 +1,6 @@
 import json
 import time
+from base64 import b64decode
 from enum import Enum
 from typing import Dict, List, Optional
 
@@ -8,6 +9,7 @@ import cose.algorithms
 import cose.headers
 import cose.keys.curves
 import cose.keys.keyops
+import cryptojwt.exception
 from cose.keys.cosekey import CoseKey
 from cose.keys.ec2 import EC2Key
 from cose.keys.rsa import RSAKey
@@ -105,7 +107,11 @@ def cosekey_from_jwk_dict(jwk_dict: Dict, private: bool = True) -> CoseKey:
         key.key_ops = [cose.keys.keyops.VerifyOp]
 
     if "kid" in jwk_dict:
-        key.kid = b64d(jwk_dict["kid"].encode())
+        kid = jwk_dict["kid"]
+        try:
+            key.kid = b64d(kid.encode())
+        except cryptojwt.exception.BadSyntax:
+            key.kid = b64decode(kid.encode())
 
     return key
 
