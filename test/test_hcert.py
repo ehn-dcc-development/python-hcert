@@ -20,7 +20,7 @@ def gen_keypair():
     return private_key, public_key
 
 
-def test_sign_verify():
+def test_sign1_verify():
 
     private_key, public_key = gen_keypair()
 
@@ -35,7 +35,22 @@ def test_sign_verify():
     assert res.expired is False
 
 
-def test_sign_verify_unprotected_kid():
+def test_sign_verify():
+
+    private_key, public_key = gen_keypair()
+
+    issuer = "hello"
+    ttl = 3600
+    payload = {"test": True}
+
+    signed_data = sign(private_key, issuer, ttl, payload, sign1=False)
+    res = verify(signed_data, [public_key])
+
+    assert res.eu_dgc_v1.get("test") is True
+    assert res.expired is False
+
+
+def test_sign1_verify_unprotected_kid():
 
     private_key, public_key = gen_keypair()
 

@@ -15,6 +15,8 @@ from cose.keys.ec2 import EC2Key
 from cose.keys.rsa import RSAKey
 from cose.messages import CoseMessage
 from cose.messages.sign1message import Sign1Message
+from cose.messages.signer import CoseSignature
+from cose.messages.signmessage import SignMessage
 from cryptojwt.jwk.ec import ECKey
 from cryptojwt.jwk.x509 import (
     import_private_key_from_pem_file,
@@ -131,6 +133,7 @@ class CWT(object):
         private_key: CoseKey,
         alg: cose.algorithms.CoseAlgorithm,
         kid_protected: bool = True,
+        sign1: bool = True,
     ) -> bytes:
         self.protected_header.update(
             {
@@ -142,12 +145,31 @@ class CWT(object):
             self.protected_header[cose.headers.KID] = private_key.kid
         else:
             self.unprotected_header[cose.headers.KID] = private_key.kid
-        cose_msg = Sign1Message(
-            phdr=self.protected_header if len(self.protected_header) else None,
-            uhdr=self.unprotected_header if len(self.unprotected_header) else None,
-            payload=cbor2.dumps(self.claims),
-        )
-        cose_msg.key = private_key
+        if sign1:
+            cose_msg = Sign1Message(
+                phdr=self.protected_header if len(self.protected_header) else None,
+                uhdr=self.unprotected_header if len(self.unprotected_header) else None,
+                payload=cbor2.dumps(self.claims),
+            )
+            cose_msg.key = private_key
+        else:
+            signers = [
+                CoseSignature(
+                    phdr=self.protected_header if len(self.protected_header) else None,
+                    uhdr=self.unprotected_header
+                    if len(self.unprotected_header)
+                    else None,
+                    key=private_key,
+                )
+            ]
+            cose_msg = SignMessage(
+                phdr={cose.headers.ContentType: CoseContentTypes.CWT.value},
+                uhdr=self.unprotected_header
+                if len(self.unprotected_header)
+                else None,
+                payload=cbor2.dumps(self.claims),
+                signers=signers,
+            )
         return cose_msg.encode()
 
     @classmethod
@@ -169,19 +191,32 @@ class CWT(object):
 
     @classmethod
     def from_bytes(cls, signed_data: bytes, public_keys: List[CoseKey]):
-        cose_msg: Sign1Message = CoseMessage.decode(signed_data)
+        cose_msg = CoseMessage.decode(signed_data)
 
-        kid = cose_msg.phdr.get(cose.headers.KID)
-        if kid is None:
-            kid = cose_msg.uhdr.get(cose.headers.KID)
+        if isinstance(cose_msg, Sign1Message):
+            messages = [cose_msg]
+        elif isinstance(cose_msg, SignMessage):
+            messages = cose_msg.signers
+        else:
+            raise RuntimeError("Unsupported COSE message format")
+
+        signers = []
+        for msg in messages:
+            kid = msg.phdr.get(cose.headers.KID)
+            if kid is None:
+                kid = msg.uhdr.get(cose.headers.KID)
+            signers.append((kid, msg))
+
         verified_key = None
-
         for key in public_keys:
-            if key.kid == kid:
-                cose_msg.key = key
-                if cose_msg.verify_signature():
-                    verified_key = key
-                    break
+            for kid, msg in signers:
+                if key.kid == kid:
+                    msg.key = key
+                    if msg.verify_signature():
+                        verified_key = key
+                        break
+            if verified_key:
+                break
         else:
             raise RuntimeError("Bad signature")
 

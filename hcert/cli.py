@@ -26,7 +26,11 @@ def command_sign(args: argparse.Namespace):
 
     eu_dgc_v1 = json.loads(input_data)
     cwt_bytes = sign(
-        private_key=private_key, payload=eu_dgc_v1, issuer=args.issuer, ttl=args.ttl
+        private_key=private_key,
+        payload=eu_dgc_v1,
+        issuer=args.issuer,
+        ttl=args.ttl,
+        sign1=args.sign1,
     )
     logger.info("Raw signed CWT: %d bytes", len(cwt_bytes))
 
@@ -143,6 +147,12 @@ def main():
         metavar="filename",
         help="QR output",
         required=False,
+    )
+    parser_sign.add_argument(
+        "--sign1",
+        action="store_true",
+        help="Sign with COSE_Sign1",
+        default=True,
     )
 
     parser_verify = subparsers.add_parser("verify", help="Verify signed cert")
