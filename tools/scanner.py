@@ -93,10 +93,9 @@ def main():
         help="Scanner serial port",
         default=DEFAULT_SCANNER_PORT,
     )
-    parser.add_argument(
-        "--jwks", metavar="filename", help="JWKS filename", required=True
-    )
+    parser.add_argument("--jwks", metavar="filename", help="JWKS filename")
     parser.add_argument("--input", metavar="filename", help="Raw input filename")
+    parser.add_argument("--output", metavar="filename", help="Raw output filename")
     parser.add_argument(
         "--debug",
         action="store_true",
@@ -112,12 +111,12 @@ def main():
 
     public_keys = []
 
-    with open(args.jwks) as jwks_file:
-        jwks = json.load(jwks_file)
-        for jwk_dict in jwks.get("keys", []):
-            key = cosekey_from_jwk_dict(jwk_dict, private=False)
-            key.kid = b64d(jwk_dict["kid"].encode())
-            public_keys.append(key)
+    if args.jwks:
+        with open(args.jwks) as jwks_file:
+            jwks = json.load(jwks_file)
+            for jwk_dict in jwks.get("keys", []):
+                key = cosekey_from_jwk_dict(jwk_dict, private=False)
+                public_keys.append(key)
 
     if args.input:
         with open(args.input, "rb") as input_file:
@@ -133,7 +132,11 @@ def main():
             s = data.decode()
             if s.startswith("HC1:"):
                 signed_data = decode_and_decompress(data[4:])
-                process_hc1_cwt(signed_data, public_keys)
+                if args.output:
+                    with open(args.output, "wb") as output_file:
+                        output_file.write(signed_data)
+                if args.jwks:
+                    process_hc1_cwt(signed_data, public_keys)
         time.sleep(1)
 
 
