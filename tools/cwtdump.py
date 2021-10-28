@@ -46,7 +46,12 @@ def main():
     cwt_cbor = cbor2.loads(cwt_bytes)
 
     phdr = cbor2.loads(cwt_cbor.value[0]) if cwt_cbor.value[0] else None
-    uhdr = cbor2.loads(cwt_cbor.value[1]) if cwt_cbor.value[1] else None
+    try:
+        uhdr = cbor2.loads(cwt_cbor.value[1]) if cwt_cbor.value[1] else None
+    except TypeError as exc:
+        print("Exception:", exc)
+        print("Unprotected header:", cwt_cbor.value[1])
+        uhdr = None
     message = cbor2.loads(cwt_cbor.value[2])
     signature = cwt_cbor.value[3]
 
