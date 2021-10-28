@@ -53,6 +53,7 @@ def command_verify(args: argparse.Namespace):
             jwks = json.load(jwks_file)
             for jwk_dict in jwks.get("keys", []):
                 key = cosekey_from_jwk_dict(jwk_dict, private=False)
+                key.iss = jwk_dict.get("iss")
                 public_keys.append(key)
     elif args.key:
         public_keys = [read_cosekey(args.key, private=False)]
@@ -66,7 +67,7 @@ def command_verify(args: argparse.Namespace):
     res = verify(signed_data=signed_data, public_keys=public_keys)
 
     logger.info("Signatured issued by: %s", res.iss)
-    logger.info("Signature verified by: %s", b64e(res.kid).decode())
+    logger.info("Signature verified by: %s (%s)", b64e(res.kid).decode(), res.key.iss)
     logger.info("Signatured issued at: %s", res.iat)
 
     if res.expired:
