@@ -23,6 +23,7 @@ class HealthCertificateClaims(Enum):
 @dataclass
 class HcertVerifyResult:
     kid: bytes
+    key: CoseKey
     iss: str
     iat: datetime
     exp: datetime
@@ -49,7 +50,7 @@ def sign(
         private_key=private_key, alg=SIGN_ALG, kid_protected=kid_protected, sign1=sign1
     )
 
-    logger.info("Raw signed CWT: %d bytes", len(cwt_bytes))
+    logger.debug("Raw signed CWT: %d bytes", len(cwt_bytes))
 
     return cwt_bytes
 
@@ -60,19 +61,21 @@ def verify(signed_data: bytes, public_keys: List[CoseKey]) -> dict:
     cwt = CWT.from_bytes(signed_data=signed_data, public_keys=public_keys)
 
     if (iss := cwt.claims.get(CwtClaims.ISS.value)) is not None:
-        logger.info("Signatured issued by: %s", iss)
+        logger.debug("Signatured issued by: %s", iss)
 
-    logger.info("Signature verified by: %s", b64e(cwt.key.kid).decode())
+    logger.debug(
+        "Signature verified by: %s (%s)", b64e(cwt.key.kid).decode(), cwt.key.iss
+    )
 
     if (iat := cwt.claims.get(CwtClaims.IAT.value)) is not None:
-        logger.info("Signatured issued at: %s", datetime.fromtimestamp(iat))
+        logger.debug("Signatured issued at: %s", datetime.fromtimestamp(iat))
 
     if (exp := cwt.claims.get(CwtClaims.EXP.value)) is not None:
         if exp > now:
-            logger.info("Signatured expires at: %s", datetime.fromtimestamp(exp))
+            logger.debug("Signatured expires at: %s", datetime.fromtimestamp(exp))
             expired = False
         else:
-            logger.info("Signatured expired at: %s", datetime.fromtimestamp(exp))
+            logger.debug("Signatured expired at: %s", datetime.fromtimestamp(exp))
             expired = True
 
     hcert = cwt.claims.get(CwtClaims.HCERT.value)
@@ -80,6 +83,7 @@ def verify(signed_data: bytes, public_keys: List[CoseKey]) -> dict:
 
     return HcertVerifyResult(
         iss=iss,
+        key=cwt.key,
         kid=cwt.key.kid,
         iat=datetime.fromtimestamp(iat) if iat else None,
         exp=datetime.fromtimestamp(exp) if exp else None,
