@@ -131,6 +131,7 @@ def main():
         if data:
             s = data.decode()
             if s.startswith("HC1:"):
+                print(data)
                 signed_data = decode_and_decompress(data[4:])
                 if args.output:
                     with open(args.output, "wb") as output_file:
