@@ -126,6 +126,7 @@ def main():
 
     scanner = AccessIsAtr110(port=args.port)
     print("Waiting for data from scanner...")
+    count = 1
     while True:
         data = scanner.read()
         if data:
@@ -134,8 +135,11 @@ def main():
                 print(data)
                 signed_data = decode_and_decompress(data[4:])
                 if args.output:
-                    with open(args.output, "wb") as output_file:
+                    filename = f"{args.output}-{count}"
+                    with open(filename, "wb") as output_file:
                         output_file.write(signed_data)
+                    count += 1
+                    print("Scanned data written to", filename)
                 if args.jwks:
                     process_hc1_cwt(signed_data, public_keys)
         time.sleep(1)
