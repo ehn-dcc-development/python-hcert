@@ -67,7 +67,11 @@ def command_verify(args: argparse.Namespace):
     res = verify(signed_data=signed_data, public_keys=public_keys)
 
     logger.info("Signatured issued by: %s", res.iss)
-    logger.info("Signature verified by: %s (%s)", b64e(res.kid).decode(), res.key.iss)
+    logger.info(
+        "Signature verified by: %s (%s)",
+        b64e(res.kid).decode(),
+        cwt.key.iss if hasattr(cwt.key, "iss") else None,
+    )
     logger.info("Signatured issued at: %s", res.iat)
 
     if res.expired:
