@@ -19,7 +19,7 @@ dsc_trust_list = tl["dsc_trust_list"]
 keys = []
 for country, data in dsc_trust_list.items():
     for jwk_dict in data.get("keys", []):
-        keys.append({ "iss": country, **jwk_dict})
+        keys.append({"iss": country, **jwk_dict})
 
 with open("tl-jwks.json", "wt") as output_file:
     json.dump({"keys": keys}, output_file, indent=True)
