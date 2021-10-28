@@ -53,7 +53,7 @@ def command_verify(args: argparse.Namespace):
             jwks = json.load(jwks_file)
             for jwk_dict in jwks.get("keys", []):
                 key = cosekey_from_jwk_dict(jwk_dict, private=False)
-                key.iss = jwk_dict.get("iss")
+                key.issuer = jwk_dict.get("issuer")
                 public_keys.append(key)
     elif args.key:
         public_keys = [read_cosekey(args.key, private=False)]
@@ -70,7 +70,7 @@ def command_verify(args: argparse.Namespace):
     logger.info(
         "Signature verified by: %s (%s)",
         b64e(res.kid).decode(),
-        cwt.key.iss if hasattr(cwt.key, "iss") else None,
+        res.key.issuer if hasattr(res.key, "issuer") else None,
     )
     logger.info("Signatured issued at: %s", res.iat)
 

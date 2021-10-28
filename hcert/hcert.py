@@ -66,7 +66,7 @@ def verify(signed_data: bytes, public_keys: List[CoseKey]) -> dict:
     logger.debug(
         "Signature verified by: %s (%s)",
         b64e(cwt.key.kid).decode(),
-        cwt.key.iss if hasattr(cwt.key, "iss") else None,
+        cwt.key.issuer if hasattr(cwt.key, "issuer") else None,
     )
 
     if (iat := cwt.claims.get(CwtClaims.IAT.value)) is not None:
